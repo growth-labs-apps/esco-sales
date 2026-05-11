@@ -631,7 +631,7 @@ const PRACTICES = [
     volume: 'Low', utilization: 'Mid', regulatory: 'Mid',
     reimbursement: 'High', lever: 'Mild leverage', hasLever: true },
 
-  { id: 'quiet-specialty', name: 'Quiet specialty consultation practices', tier: 'B',
+  { id: 'quiet-specialty', name: 'Specialty consultation practices', tier: 'B',
     examples: 'endocrinology, rheumatology, sleep medicine, insurance-based psychiatry, hematology consultation',
     volume: 'Low to Mid', utilization: 'Low to Mid', regulatory: 'Low',
     reimbursement: 'Mid', lever: 'None', hasLever: false },
@@ -713,7 +713,7 @@ const ATTRIBUTES = [
     promise: 'How many patients move through. More traffic, more wear.',
     description: 'How many patients move through the facility. More patients means more wear and traffic for ESCO to clean up after. Low volume helps a prospect land in a higher tier; high volume pushes it down unless reimbursement compensates.',
     levels: [
-      { label: 'Low', desc: 'Light patient flow. Limited wear, predictable cleaning load.', examples: 'aesthetic & cosmetic, dermatology, fertility, concierge DPC, allergy, bariatric consult, quiet specialty consult' },
+      { label: 'Low', desc: 'Light patient flow. Limited wear, predictable cleaning load.', examples: 'aesthetic & cosmetic, dermatology, fertility, concierge DPC, allergy, bariatric consult, specialty consult' },
       { label: 'Mid', desc: 'Moderate patient flow. Workload scales with appointment density.', examples: 'standard specialty, OB-GYN' },
       { label: 'High', desc: 'Heavy patient flow. Significant wear and traffic per shift.', examples: 'procedure-integrated, outpatient surgical, dialysis, primary care, urgent care, community health' },
     ] },
@@ -729,7 +729,7 @@ const ATTRIBUTES = [
     promise: 'Facility cleanliness requirements. A modulator, not a driver.',
     description: 'The facility-level regulatory load the practice carries: accreditation standards, sterilization protocols, and any cleanliness requirements tied to how the clinical operation runs. Regulatory works as a modulator — high regulatory adds pricing leverage and makes accounts stickier within a tier, but it usually won\'t drop a profile down on its own. Refers to facility-level requirements that affect housekeeping, not the clinical regulatory work the clinical team handles.',
     levels: [
-      { label: 'Low', desc: 'Minimal facility-level cleanliness requirements beyond standard housekeeping.', examples: 'concierge DPC, quiet specialty consult, primary care, retail optometry, alternative & integrative' },
+      { label: 'Low', desc: 'Minimal facility-level cleanliness requirements beyond standard housekeeping.', examples: 'concierge DPC, specialty consult, primary care, retail optometry, alternative & integrative' },
       { label: 'Mid', desc: 'Defined cleanliness protocols tied to specific clinical activities.', examples: 'bariatric consult, imaging, OB-GYN, community health, opioid treatment' },
       { label: 'High', desc: 'Strict accreditation, sterilization, or surgical-grade cleanliness protocols. Adds pricing leverage and account stickiness.', examples: 'fertility, procedure-integrated, outpatient surgical, oncology, dialysis' },
     ] },
@@ -738,7 +738,7 @@ const ATTRIBUTES = [
     description: 'How well the practice gets paid for its services. Reimbursement is the biggest driver of tier placement because it determines whether a prospect can afford ESCO\'s pricing and whether the work will actually be profitable. High reimbursement opens doors, low reimbursement closes them, and mid reimbursement is where the bread-and-butter accounts live.',
     levels: [
       { label: 'Low', desc: 'Practice is paid poorly per encounter. Economics rarely support sustainable pricing.', examples: 'community health, alternative & integrative, opioid treatment, Medicaid-dominant primary care, free/charity clinics' },
-      { label: 'Mid', desc: 'Standard insurance-paid practice. Where bread-and-butter accounts live.', examples: 'quiet specialty consult, standard specialty, urgent care, OB-GYN' },
+      { label: 'Mid', desc: 'Standard insurance-paid practice. Where bread-and-butter accounts live.', examples: 'specialty consult, standard specialty, urgent care, OB-GYN' },
       { label: 'High', desc: 'Cash-pay, surgical, membership, or specialty-paid. Opens doors and supports premium pricing.', examples: 'aesthetic & cosmetic, dermatology, fertility, concierge DPC, allergy, bariatric consult, procedure-integrated, outpatient surgical, oncology, dialysis' },
     ] },
 ];
