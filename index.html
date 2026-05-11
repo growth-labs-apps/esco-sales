@@ -1,0 +1,976 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ESCO · Prospect Framework</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" />
+<style>
+  :root {
+    --primary: #0A2540;
+    --primary-2: #0D2D4D;
+    --accent:  #2BB3A3;        /* default — Scrubs Teal */
+    --accent-soft: rgba(43, 179, 163, 0.12);
+    --paper:   #FFFFFF;
+    --paper-2: #F4F6F8;
+    --paper-3: #E6EAEE;
+    --ink:     #0A0F1C;
+    --line:      rgba(10, 15, 28, 0.12);
+    --line-soft: rgba(10, 15, 28, 0.07);
+    --muted:     rgba(10, 15, 28, 0.58);
+    --display: 'Figtree', system-ui, sans-serif;
+    --body:    'Inter', system-ui, sans-serif;
+    --mono:    'JetBrains Mono', ui-monospace, monospace;
+  }
+
+  /* Per-page accent — one accent per surface (brand spec rule).
+     Atlas + Attributes inherit the default Teal.
+     Engagement adopts Signal Amber (operations/facilities).
+     Sales adopts Care Violet (people/process).
+     Flyout and top nav are explicitly pinned to Teal below. */
+  body:has(#page-engagement.active) {
+    --accent: #F59E0B;
+    --accent-soft: rgba(245, 158, 11, 0.12);
+  }
+  body:has(#page-sales.active) {
+    --accent: #8B5CF6;
+    --accent-soft: rgba(139, 92, 246, 0.12);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--body);
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    transition: background 0.2s;
+  }
+  body:has(#page-attributes.active),
+  body:has(#page-engagement.active),
+  body:has(#page-sales.active) { background: var(--paper-2); }
+
+  h1, h2, h3, h4 { font-family: var(--display); font-weight: 700; letter-spacing: -0.03em; margin: 0; }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; cursor: pointer; }
+
+  /* TOP NAV */
+  .topnav { background: var(--primary); color: #fff; border-bottom: 1px solid rgba(255,255,255,0.08); position: sticky; top: 0; z-index: 50; }
+  .topnav-inner { max-width: 1360px; margin: 0 auto; padding: 0 48px; height: 64px; display: flex; align-items: center; gap: 48px; }
+  .brand { display: flex; align-items: center; gap: 12px; font-family: var(--display); font-weight: 800; font-size: 20px; letter-spacing: -0.02em; }
+  .brand-bar { width: 28px; height: 4px; background: #2BB3A3; }
+  .brand-sub { font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; color: rgba(255,255,255,0.55); margin-left: 2px; text-transform: uppercase; }
+  .nav-links { display: flex; gap: 4px; margin-left: auto; }
+  .nav-link { padding: 8px 14px; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.7); border-radius: 4px; transition: color 0.15s, background 0.15s; border: none; background: transparent; font-family: inherit; }
+  .nav-link:hover { color: #fff; }
+  .nav-link.active { color: #fff; background: rgba(255,255,255,0.06); }
+  .nav-link.active.active::before { content: "● "; color: #2BB3A3; }
+  .nav-link.active::before { content: "● "; color: #2BB3A3; }
+
+  /* PAGE SHELL */
+  .page { max-width: 1360px; margin: 0 auto; padding: 0 48px 96px; display: none; }
+  .page.active { display: block; }
+
+  /* KICKER */
+  .kicker { display: inline-block; font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); padding: 4px 10px; background: var(--paper-2); border: 1px solid var(--line); border-radius: 999px; }
+  .kicker.dark { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.14); color: rgba(255,255,255,0.75); }
+
+  /* NAVY HERO */
+  .hero { background: var(--primary); color: #fff; margin: 0 -48px 56px; padding: 72px 48px 80px; position: relative; overflow: hidden; }
+  .hero-inner { max-width: 1360px; margin: 0 auto; position: relative; z-index: 1; }
+  .hero-dots { position: absolute; inset: 0; background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.08) 1px, transparent 0); background-size: 32px 32px; -webkit-mask-image: radial-gradient(ellipse at top right, black 0%, transparent 70%); mask-image: radial-gradient(ellipse at top right, black 0%, transparent 70%); pointer-events: none; }
+  .hero h1 { font-size: 72px; line-height: 0.96; margin: 20px 0 20px; max-width: 900px; letter-spacing: -0.035em; }
+  .hero h1 em { color: var(--accent); font-style: normal; }
+  .hero-tag { font-size: 17px; color: rgba(255,255,255,0.72); max-width: 660px; line-height: 1.5; }
+
+  /* INFO BUTTON */
+  .info-btn { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: transparent; border: 1px solid var(--line); color: var(--muted); font-family: var(--mono); font-size: 13px; font-weight: 500; cursor: pointer; line-height: 1; padding: 0; transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.2s; }
+  .info-btn:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .info-btn.open { background: var(--primary); color: #fff; border-color: var(--primary); transform: rotate(45deg); }
+
+  /* POP (anchored tooltip popover) */
+  .pop-anchor { position: relative; display: inline-block; }
+  .pop { display: none; position: absolute; background: var(--ink); color: #fff; padding: 14px 18px; border-radius: 6px; font-size: 13px; line-height: 1.55; max-width: 320px; width: max-content; box-shadow: 0 16px 40px rgba(10, 37, 64, 0.28); z-index: 40; letter-spacing: 0.005em; }
+  .pop.active { display: block; }
+  .pop::before { content: ""; position: absolute; top: -6px; right: 14px; width: 12px; height: 12px; background: var(--ink); transform: rotate(45deg); }
+  .pop-strong { color: var(--accent); font-weight: 500; margin-bottom: 6px; display: block; font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+  /* ATLAS — tier grid */
+  .tier-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .tier-zone { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
+  .tier-zone-header { padding: 20px 20px 18px; border-bottom: 1px solid var(--line); background: var(--paper-2); position: relative; }
+  .tier-letter { font-family: var(--display); font-weight: 800; font-size: 56px; line-height: 1; letter-spacing: -0.04em; color: var(--primary); }
+  .tier-marker { position: absolute; top: 26px; right: 56px; width: 6px; height: 6px; border-radius: 50%; }
+  .tier-zone[data-tier="A"] .tier-marker { background: #2BB3A3; }
+  .tier-zone[data-tier="B"] .tier-marker { background: #2BB3A3; opacity: 0.5; }
+  .tier-zone[data-tier="C"] .tier-marker { background: var(--ink); opacity: 0.25; }
+  .tier-zone[data-tier="D"] .tier-marker { background: var(--ink); opacity: 0.15; }
+  .tier-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-top: 6px; }
+  .tier-header-info { position: absolute; top: 20px; right: 18px; }
+  .tier-header-info .pop { top: 32px; right: 0; max-width: 280px; }
+  .tier-header-info .pop::before { left: auto; right: 6px; }
+  .tier-zone-body { padding: 12px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+  .practice-card { background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; cursor: pointer; transition: border-color 0.15s, background 0.15s, transform 0.1s; position: relative; }
+  .practice-card:hover { border-color: var(--primary); background: var(--paper-2); }
+  .practice-card:active { transform: scale(0.99); }
+  .practice-card.has-lever::after { content: ""; position: absolute; top: 14px; right: 14px; width: 5px; height: 5px; border-radius: 50%; background: #2BB3A3; }
+  .practice-name { font-family: var(--display); font-weight: 600; font-size: 14px; line-height: 1.3; color: var(--ink); letter-spacing: -0.01em; padding-right: 14px; }
+
+  .atlas-legend { display: flex; align-items: center; gap: 24px; margin-bottom: 24px; font-size: 12px; color: var(--muted); font-family: var(--mono); letter-spacing: 0.03em; }
+  .atlas-legend .legend-item { display: flex; align-items: center; gap: 8px; }
+  .atlas-legend .legend-dot { width: 5px; height: 5px; border-radius: 50%; background: #2BB3A3; }
+
+  /* FLYOUT */
+  .scrim { display: none; position: fixed; inset: 0; background: rgba(10, 15, 28, 0.4); z-index: 90; animation: fadeIn 0.2s; }
+  .scrim.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .flyout { position: fixed; top: 0; right: 0; bottom: 0; width: 520px; max-width: 90vw; background: var(--paper); z-index: 100; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: -20px 0 48px rgba(10, 37, 64, 0.18); }
+  .flyout.active { transform: translateX(0); }
+
+  .flyout-head { padding: 28px 32px 22px; border-bottom: 1px solid var(--line); background: var(--paper); position: relative; }
+  .flyout-close { position: absolute; top: 24px; right: 24px; width: 32px; height: 32px; border-radius: 50%; background: var(--paper-2); border: 1px solid var(--line); color: var(--ink); font-size: 18px; line-height: 1; padding: 0; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
+  .flyout-close:hover { background: var(--paper-3); }
+  .flyout-tier-tag { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: 0.12em; color: #2BB3A3; margin-bottom: 12px; }
+  .flyout-name { font-family: var(--display); font-weight: 700; font-size: 28px; line-height: 1.1; letter-spacing: -0.025em; color: var(--ink); padding-right: 40px; }
+  .flyout-examples { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 14px; line-height: 1.55; letter-spacing: 0.02em; }
+  .flyout-body { flex: 1; overflow-y: auto; padding: 28px 32px 32px; }
+  .flyout-attrs { display: flex; flex-direction: column; gap: 0; margin-bottom: 24px; }
+  .flyout-attr { display: grid; grid-template-columns: 130px 1fr; gap: 16px; align-items: start; padding: 14px 0; border-bottom: 1px solid var(--line-soft); }
+  .flyout-attr:last-child { border-bottom: none; }
+  .flyout-attr-name { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); padding-top: 5px; }
+  .flyout-attr-value { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .chip { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 500; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font-family: var(--body); }
+  .chip.low { color: var(--muted); }
+  .chip.mid { color: var(--ink); background: var(--paper-2); }
+  .chip.high { color: var(--primary); border-color: var(--primary); font-weight: 600; }
+  .chip.none { color: var(--muted); font-style: italic; }
+  .chip-sep { font-size: 11px; color: var(--muted); font-family: var(--mono); }
+  .chip-note { font-size: 11px; color: var(--muted); font-style: italic; }
+
+  .flyout-lever { background: var(--paper-2); border-radius: 6px; border-left: 3px solid #2BB3A3; padding: 16px 18px; margin-bottom: 20px; }
+  .flyout-lever .lever-tag { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #2BB3A3; margin-bottom: 6px; }
+  .flyout-lever p { margin: 0; font-size: 14px; line-height: 1.5; color: var(--ink); }
+
+  .flyout-rationale { background: var(--ink); color: rgba(255,255,255,0.92); padding: 18px 22px; border-radius: 6px; font-family: var(--mono); font-size: 12px; line-height: 1.7; letter-spacing: 0.02em; }
+  .flyout-rationale .spec-key { color: rgba(255,255,255,0.5); display: inline-block; width: 70px; }
+  .flyout-rationale .spec-status { color: #2BB3A3; }
+
+  .flyout-neighbors { margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--line); }
+  .flyout-neighbors-title { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  .flyout-neighbors-row { display: flex; flex-direction: column; gap: 6px; }
+  .flyout-neighbor { padding: 10px 14px; border: 1px solid var(--line); border-radius: 4px; font-size: 13px; font-weight: 500; cursor: pointer; transition: border-color 0.15s, background 0.15s; background: var(--paper); text-align: left; font-family: inherit; color: inherit; }
+  .flyout-neighbor:hover { border-color: var(--primary); background: var(--paper-2); }
+
+  /* ATTRIBUTES — collapsed reveals */
+  .attr-list { display: flex; flex-direction: column; gap: 12px; }
+  .attr-block { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; transition: border-color 0.2s, box-shadow 0.2s; position: relative; }
+  .attr-block::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 48px;
+    background: var(--accent);
+  }
+  .attr-block.open { border-color: var(--primary); box-shadow: 0 8px 28px rgba(10, 37, 64, 0.08); }
+  .attr-block-toggle { width: 100%; background: transparent; border: none; padding: 26px 30px; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 24px; text-align: left; cursor: pointer; font-family: inherit; color: inherit; transition: background 0.15s; }
+  .attr-block-toggle:hover { background: var(--paper-2); }
+  .attr-block.open .attr-block-toggle { background: var(--paper-2); border-bottom: 1px solid var(--line); }
+  .attr-block-headline { display: flex; flex-direction: column; gap: 6px; }
+  .attr-block-headline h3 { font-size: 28px; letter-spacing: -0.025em; line-height: 1.1; }
+  .attr-block-headline .attr-block-promise { font-size: 15px; color: var(--muted); line-height: 1.45; }
+  .attr-block-toggle .info-btn { flex-shrink: 0; width: 32px; height: 32px; font-size: 18px; }
+  .attr-block.open .info-btn { background: var(--primary); color: #fff; border-color: var(--primary); transform: rotate(45deg); }
+  .attr-block-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+  .attr-block.open .attr-block-body { max-height: 1500px; }
+  .attr-block-inner { padding: 28px 30px 30px; }
+  .attr-block-desc { font-size: 15px; line-height: 1.6; color: var(--ink); margin: 0 0 24px; max-width: 880px; }
+  .level-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .level-card { background: var(--paper-2); border: 1px solid var(--line); border-radius: 6px; padding: 18px 20px; }
+  .level-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+  .level-desc { font-size: 14px; line-height: 1.55; color: var(--ink); margin: 0 0 14px; }
+  .level-examples { font-family: var(--mono); font-size: 11px; color: var(--muted); line-height: 1.55; letter-spacing: 0.02em; padding-top: 12px; border-top: 1px solid var(--line); }
+
+  /* ENGAGEMENT */
+  .dim-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  .dim-block { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 26px 28px; position: relative; box-shadow: 0 1px 0 rgba(10, 37, 64, 0.03); overflow: hidden; }
+  .dim-block::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 48px;
+    background: var(--accent);
+  }
+  .dim-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
+  .dim-head-text { display: flex; flex-direction: column; gap: 6px; }
+  .dim-head h3 { font-size: 24px; letter-spacing: -0.025em; line-height: 1.1; }
+  .dim-sub { font-size: 14px; color: var(--muted); line-height: 1.45; max-width: 380px; }
+  .dim-block .pop-anchor .pop { top: 32px; right: 0; }
+  .dim-block .pop-anchor .pop::before { left: auto; right: 6px; }
+
+  /* Step chip row */
+  .step-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .step-chip { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 12px 16px; border: 1px solid var(--line); border-radius: 4px; background: var(--paper); transition: transform 0.15s; }
+  .step-chip:hover { transform: translateY(-1px); }
+  .step-chip-num { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; color: var(--muted); }
+  .step-chip-label { font-family: var(--display); font-weight: 600; font-size: 14px; color: var(--ink); letter-spacing: -0.01em; }
+  .step-chip-meta { font-family: var(--mono); font-size: 12px; font-weight: 500; color: var(--ink); letter-spacing: 0.01em; }
+  .step-chip[data-step="1"] { background: var(--paper); border-color: var(--line); }
+  .step-chip[data-step="2"] { background: var(--paper-2); border-color: var(--line); }
+  .step-chip[data-step="3"] { background: var(--paper-3); border-color: var(--paper-3); }
+  .step-chip[data-step="4"] { background: var(--primary-2); border-color: var(--primary-2); }
+  .step-chip[data-step="4"] .step-chip-num { color: rgba(255,255,255,0.55); }
+  .step-chip[data-step="4"] .step-chip-label { color: #fff; }
+  .step-chip[data-step="4"] .step-chip-meta { color: rgba(255,255,255,0.85); }
+  .step-chip[data-step="5"] { background: var(--primary); border-color: var(--primary); }
+  .step-chip[data-step="5"] .step-chip-num { color: var(--accent); }
+  .step-chip[data-step="5"] .step-chip-label { color: #fff; }
+  .step-chip[data-step="5"] .step-chip-meta { color: #fff; }
+
+  /* SALES */
+  .sales-section-label { margin-bottom: 16px; margin-top: 8px; }
+  .sales-section-label:not(:first-of-type) { margin-top: 56px; }
+
+  .sales-structural-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
+  .sales-card { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 32px 36px; position: relative; box-shadow: 0 1px 0 rgba(10, 37, 64, 0.03); overflow: hidden; }
+  .sales-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 56px;
+    background: var(--accent);
+  }
+  .sales-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 8px; }
+  .sales-card h3 { font-size: 32px; letter-spacing: -0.03em; line-height: 1.05; }
+  .sales-card .sales-card-promise { font-size: 16px; color: var(--muted); line-height: 1.5; margin: 0 0 28px; max-width: 480px; }
+  .sales-card .pop-anchor .pop { top: 32px; right: 0; }
+  .sales-card .pop-anchor .pop::before { left: auto; right: 6px; }
+
+  .sales-stack { display: flex; flex-direction: column; gap: 8px; }
+  .sales-stack-horizontal { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .sales-stack-item { padding: 16px 18px; background: var(--paper-2); border: 1px solid var(--line); border-radius: 4px; }
+  .sales-stack-label { font-family: var(--display); font-weight: 600; font-size: 16px; color: var(--ink); margin-bottom: 4px; letter-spacing: -0.01em; }
+  .sales-stack-meta { font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: 0.03em; line-height: 1.45; }
+  .sales-stack-item.emphasis { background: var(--primary); border-color: var(--primary); }
+  .sales-stack-item.emphasis .sales-stack-label { color: #fff; }
+  .sales-stack-item.emphasis .sales-stack-meta { color: rgba(255,255,255,0.7); }
+
+  /* Featured Time card */
+  .time-card { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 40px; position: relative; box-shadow: 0 1px 0 rgba(10, 37, 64, 0.03); overflow: hidden; }
+  .time-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 72px;
+    background: var(--accent);
+  }
+  .time-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-bottom: 36px; }
+  .time-card-head-text { max-width: 720px; }
+  .time-card-head h2 { font-size: 48px; letter-spacing: -0.035em; line-height: 0.98; margin-bottom: 16px; }
+  .time-card-head p { font-size: 17px; color: var(--muted); line-height: 1.5; margin: 0; max-width: 660px; }
+
+  .time-states { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 36px; }
+  .time-state { padding: 24px 26px; border: 1px solid var(--line); border-radius: 6px; background: var(--paper); position: relative; }
+  .time-state-num { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 12px; }
+  .time-state-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; }
+  .time-state-headline { font-family: var(--display); font-weight: 700; font-size: 22px; letter-spacing: -0.025em; line-height: 1.15; margin-bottom: 12px; color: var(--ink); }
+  .time-state-desc { font-size: 14px; color: var(--muted); line-height: 1.55; margin: 0; }
+
+  .time-state[data-state="critical"] .time-state-label { color: var(--accent); }
+  .time-state[data-state="critical"] .time-state-num::before { content: "● "; color: var(--accent); }
+  .time-state[data-state="semi"] .time-state-label { color: var(--ink); opacity: 0.7; }
+  .time-state[data-state="non"] .time-state-label { color: var(--muted); }
+  .time-state[data-state="non"] .time-state-headline { color: var(--muted); }
+
+  /* Contract baseline — inside Time card */
+  .contract-baseline { background: var(--paper-2); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 24px 28px; }
+  .contract-baseline .kicker { margin-bottom: 18px; }
+  .baseline-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+  .baseline-item { border-left: 2px solid var(--accent); padding-left: 18px; }
+  .baseline-num { font-family: var(--display); font-weight: 700; font-size: 32px; letter-spacing: -0.02em; color: var(--ink); line-height: 1; margin-bottom: 8px; }
+  .baseline-desc { font-size: 12px; color: var(--muted); line-height: 1.5; font-family: var(--mono); letter-spacing: 0.03em; }
+
+  /* Footer */
+  .footer { border-top: 1px solid var(--line); margin-top: 80px; padding: 32px 0; font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.08em; display: flex; justify-content: space-between; }
+
+  /* Responsive */
+  @media (max-width: 1100px) {
+    .tier-grid { grid-template-columns: repeat(2, 1fr); }
+    .level-grid { grid-template-columns: 1fr; }
+    .dim-grid { grid-template-columns: 1fr; }
+    .sales-structural-grid { grid-template-columns: 1fr; }
+    .sales-stack-horizontal { grid-template-columns: repeat(2, 1fr); }
+    .time-states { grid-template-columns: 1fr; }
+    .baseline-row { grid-template-columns: 1fr; gap: 16px; }
+    .hero h1 { font-size: 48px; }
+    .time-card-head h2 { font-size: 36px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <div class="topnav-inner">
+    <div class="brand">
+      <div class="brand-bar"></div>
+      <span>ESCO</span>
+      <span class="brand-sub">Prospect Framework</span>
+    </div>
+    <div class="nav-links">
+      <button class="nav-link active" data-page="atlas">Tier Atlas</button>
+      <button class="nav-link" data-page="attributes">Attributes</button>
+      <button class="nav-link" data-page="engagement">Engagement</button>
+      <button class="nav-link" data-page="sales">Sales</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ATLAS -->
+<section class="page active" id="page-atlas">
+  <div class="hero">
+    <div class="hero-dots"></div>
+    <div class="hero-inner">
+      <span class="kicker dark">● The Operational Profile · Tier Atlas</span>
+      <h1>What kind of practice <em>is it?</em></h1>
+      <p class="hero-tag">Four tiers, sorted by the economics. Click any tier letter for placement criteria. Click any practice for its full breakdown.</p>
+    </div>
+  </div>
+
+  <div class="atlas-legend">
+    <div class="legend-item">
+      <span class="legend-dot"></span>
+      <span>Teal dot · regulatory or procedural lever</span>
+    </div>
+  </div>
+
+  <div class="tier-grid" id="tier-grid"></div>
+
+  <div class="footer">
+    <span>ESCO · 2026 · Prospect Framework v1</span>
+    <span>Reimbursement primary, volume and utilization modifying</span>
+  </div>
+</section>
+
+<!-- ATTRIBUTES -->
+<section class="page" id="page-attributes">
+  <div class="hero">
+    <div class="hero-dots"></div>
+    <div class="hero-inner">
+      <span class="kicker dark">● The four operational attributes</span>
+      <h1>What drives <em>tier placement.</em></h1>
+      <p class="hero-tag">Reimbursement is the dominant driver. Volume and utilization shape the working load. Regulatory acts as a modulator — it doesn't change tier on its own, but it changes the conversation. Click any attribute to expand.</p>
+    </div>
+  </div>
+
+  <div class="attr-list" id="attr-list"></div>
+
+  <div class="footer">
+    <span>ESCO · 2026 · Prospect Framework v1</span>
+    <span>Attribute definitions from framework document</span>
+  </div>
+</section>
+
+<!-- ENGAGEMENT -->
+<section class="page" id="page-engagement">
+  <div class="hero">
+    <div class="hero-dots"></div>
+    <div class="hero-inner">
+      <span class="kicker dark">● The Engagement Profile · How the work is shaped</span>
+      <h1>The <em>shape</em> of working together.</h1>
+      <p class="hero-tag">Independent of tier. The same practice type can carry very different engagement profiles — how big, across how many sites, how spread out, on what schedule.</p>
+    </div>
+  </div>
+
+  <div class="dim-grid">
+    <div class="dim-block">
+      <div class="dim-head">
+        <div class="dim-head-text">
+          <h3>Size</h3>
+          <div class="dim-sub">Physical footprint of a single facility.</div>
+        </div>
+        <div class="pop-anchor">
+          <button class="info-btn" data-pop="pop-size">+</button>
+          <div class="pop" id="pop-size">Physical footprint of a single facility. Sets the workload within that location.</div>
+        </div>
+      </div>
+      <div class="step-row" id="size-steps"></div>
+    </div>
+
+    <div class="dim-block">
+      <div class="dim-head">
+        <div class="dim-head-text">
+          <h3>Locations</h3>
+          <div class="dim-sub">How many facilities are part of the engagement.</div>
+        </div>
+        <div class="pop-anchor">
+          <button class="info-btn" data-pop="pop-loc">+</button>
+          <div class="pop" id="pop-loc">How many facilities are part of the engagement. Drives the breadth of the operation and the logistics behind it.</div>
+        </div>
+      </div>
+      <div class="step-row" id="loc-steps"></div>
+    </div>
+
+    <div class="dim-block">
+      <div class="dim-head">
+        <div class="dim-head-text">
+          <h3>Proximity</h3>
+          <div class="dim-sub">How spread out the locations are.</div>
+        </div>
+        <div class="pop-anchor">
+          <button class="info-btn" data-pop="pop-prox">+</button>
+          <div class="pop" id="pop-prox">Tightly clustered sites enable efficient routing; widely dispersed sites introduce transit time and logistical friction.</div>
+        </div>
+      </div>
+      <div class="step-row" id="prox-steps"></div>
+    </div>
+
+    <div class="dim-block">
+      <div class="dim-head">
+        <div class="dim-head-text">
+          <h3>Access</h3>
+          <div class="dim-sub">When the clinic is open.</div>
+        </div>
+        <div class="pop-anchor">
+          <button class="info-btn" data-pop="pop-access">+</button>
+          <div class="pop" id="pop-access">When the clinic is open. Shapes when ESCO can be in the facility to clean, and contributes to facility utilization and patient volume.</div>
+        </div>
+      </div>
+      <div class="step-row" id="access-steps"></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>ESCO · 2026 · Prospect Framework v1</span>
+    <span>Engagement dimensions describe shape, not desirability</span>
+  </div>
+</section>
+
+<!-- SALES -->
+<section class="page" id="page-sales">
+  <div class="hero">
+    <div class="hero-dots"></div>
+    <div class="hero-inner">
+      <span class="kicker dark">● The Sales Profile · Buying structure and reachability</span>
+      <h1>What it takes to <em>win them.</em></h1>
+      <p class="hero-tag">Three components. Practice type and affiliation describe the buying structure — stable. Time describes reachability — dynamic. The first two determine how the deal gets approved. The third determines when it can happen.</p>
+    </div>
+  </div>
+
+  <!-- Structural row: stable buying-structure attributes -->
+  <div class="sales-section-label">
+    <span class="kicker">● Buying structure · stable</span>
+  </div>
+  <div class="sales-structural-grid">
+    <div class="sales-card">
+      <div class="sales-card-head">
+        <h3>Practice type</h3>
+        <div class="pop-anchor">
+          <button class="info-btn" data-pop="pop-ptype">+</button>
+          <div class="pop" id="pop-ptype">Whether the practice operates as a single practice or multiple practices. Affects how many independent points of authority need to align on the decision. Stable structural feature — doesn't change much over time unless ownership changes.</div>
+        </div>
+      </div>
+      <p class="sales-card-promise">How many independent practices need to align.</p>
+      <div class="sales-stack">
+        <div class="sales-stack-item">
+          <div class="sales-stack-label">Single-practice</div>
+          <div class="sales-stack-meta">one decision table</div>
+        </div>
+        <div class="sales-stack-item">
+          <div class="sales-stack-label">Multi-practice</div>
+          <div class="sales-stack-meta">multiple decision points</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sales-card">
+      <div class="sales-card-head">
+        <h3>Affiliation</h3>
+        <div class="pop-anchor">
+          <button class="info-btn" data-pop="pop-affil">+</button>
+          <div class="pop" id="pop-affil">How autonomous the practice is relative to a larger organizational structure. Affiliation extends decision-making upward — combined with practice type, it determines which authority levels are actually engaged.</div>
+        </div>
+      </div>
+      <p class="sales-card-promise">How far up the decision reaches.</p>
+      <div class="sales-stack sales-stack-horizontal">
+        <div class="sales-stack-item">
+          <div class="sales-stack-label">None</div>
+          <div class="sales-stack-meta">standalone</div>
+        </div>
+        <div class="sales-stack-item">
+          <div class="sales-stack-label">Medical Association</div>
+          <div class="sales-stack-meta">own branding within</div>
+        </div>
+        <div class="sales-stack-item">
+          <div class="sales-stack-label">Medical Organization</div>
+          <div class="sales-stack-meta">org branding</div>
+        </div>
+        <div class="sales-stack-item">
+          <div class="sales-stack-label">Direct Extension</div>
+          <div class="sales-stack-meta">parent owns the decision</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Featured time card with baseline absorbed -->
+  <div class="sales-section-label">
+    <span class="kicker">● Reachability · dynamic</span>
+  </div>
+  <div class="time-card">
+    <div class="time-card-head">
+      <div class="time-card-head-text">
+        <h2>Time.</h2>
+        <p>Where the prospect sits on willingness to change. The only dynamic profile attribute — it can shift on a quality failure, a pricing dispute, or a leadership change at the incumbent vendor.</p>
+      </div>
+      <div class="pop-anchor">
+        <button class="info-btn" data-pop="pop-time">+</button>
+        <div class="pop" id="pop-time">Unlike practice type and affiliation, time is dynamic. It can shift quickly based on events — a quality failure, a pricing dispute, a leadership change at the incumbent vendor. Same prospect, same structure, but reachability changes.</div>
+      </div>
+    </div>
+
+    <div class="time-states">
+      <div class="time-state" data-state="critical">
+        <div class="time-state-num">01</div>
+        <div class="time-state-label">Critical</div>
+        <div class="time-state-headline">Actively replacing.</div>
+        <p class="time-state-desc">A quality failure, pricing dispute, or change event has broken the incumbent relationship. The prospect is moving — the question is who they move to.</p>
+      </div>
+      <div class="time-state" data-state="semi">
+        <div class="time-state-num">02</div>
+        <div class="time-state-label">Semi-critical</div>
+        <div class="time-state-headline">Open at renewal.</div>
+        <p class="time-state-desc">Not in distress, but willing to entertain alternatives at the natural decision point. Position yourself before renewal — not after auto-renewal triggers.</p>
+      </div>
+      <div class="time-state" data-state="non">
+        <div class="time-state-num">03</div>
+        <div class="time-state-label">Non-critical</div>
+        <div class="time-state-headline">Defaulting to status quo.</div>
+        <p class="time-state-desc">Nothing prompting a change. Reachability is low — long-cycle nurture and waiting for the next reachable moment.</p>
+      </div>
+    </div>
+
+    <div class="contract-baseline">
+      <span class="kicker">● Market baseline · how cleaning contracts work</span>
+      <div class="baseline-row">
+        <div class="baseline-item">
+          <div class="baseline-num">1-year</div>
+          <div class="baseline-desc">minimum term</div>
+        </div>
+        <div class="baseline-item">
+          <div class="baseline-num">3-year</div>
+          <div class="baseline-desc">average term</div>
+        </div>
+        <div class="baseline-item">
+          <div class="baseline-num">Auto</div>
+          <div class="baseline-desc">renewal unless quality issues surface</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>ESCO · 2026 · Prospect Framework v1</span>
+    <span>Time is the only dynamic profile attribute</span>
+  </div>
+</section>
+
+<!-- FLYOUT -->
+<div class="scrim" id="scrim" onclick="closeFlyout()"></div>
+<aside class="flyout" id="flyout" role="dialog" aria-modal="true" aria-labelledby="flyout-name-target">
+  <div class="flyout-head">
+    <button class="flyout-close" onclick="closeFlyout()" aria-label="Close">×</button>
+    <div class="flyout-tier-tag" id="flyout-tier-tag"></div>
+    <div class="flyout-name" id="flyout-name-target"></div>
+    <div class="flyout-examples" id="flyout-examples"></div>
+  </div>
+  <div class="flyout-body" id="flyout-body"></div>
+</aside>
+
+<script>
+// ============ DATA ============
+const PRACTICES = [
+  { id: 'aesthetic-cosmetic', name: 'Aesthetic and cosmetic surgical practices', tier: 'A',
+    examples: 'plastic surgery, med spa services, hair restoration, vein treatment, oculoplastic, sometimes Mohs',
+    volume: 'Low', utilization: 'Low', regulatory: 'Low to High',
+    regulatoryNote: 'depending on whether in-office surgery is performed',
+    reimbursement: 'High', reimbursementNote: 'cash-pay heavy',
+    lever: 'Adds leverage when surgical or accredited', hasLever: true },
+  { id: 'dermatology', name: 'Dermatology practices', tier: 'A',
+    examples: 'medical dermatology, cosmetic dermatology, Mohs surgery',
+    volume: 'Low', utilization: 'Low', regulatory: 'Low to High',
+    regulatoryNote: 'Mohs raises it', reimbursement: 'High',
+    lever: 'Mild to strong leverage when Mohs is included', hasLever: true },
+  { id: 'fertility', name: 'Fertility and reproductive medicine practices', tier: 'A',
+    examples: 'IVF, reproductive endocrinology, andrology, egg freezing',
+    volume: 'Low', utilization: 'Low', regulatory: 'High',
+    reimbursement: 'High', reimbursementNote: 'largely cash-pay',
+    lever: 'Adds leverage and stickiness', hasLever: true },
+  { id: 'concierge-dpc', name: 'Concierge / direct primary care practices', tier: 'A',
+    examples: 'membership-based primary care, sometimes with aesthetic or hormone optimization add-ons',
+    volume: 'Low', utilization: 'Low', regulatory: 'Low',
+    reimbursement: 'High', reimbursementNote: 'membership-based',
+    lever: 'None', hasLever: false },
+  { id: 'allergy-immunology', name: 'Allergy and immunology practices', tier: 'A', examples: null,
+    volume: 'Low', utilization: 'Low', regulatory: 'Low to Mid',
+    reimbursement: 'High', lever: 'None', hasLever: false },
+  { id: 'bariatric-consult', name: 'Bariatric consultation practices', tier: 'A',
+    examples: 'non-surgical consultation, follow-up, medical weight management',
+    volume: 'Low', utilization: 'Mid', regulatory: 'Mid',
+    reimbursement: 'High', lever: 'Mild leverage', hasLever: true },
+
+  { id: 'quiet-specialty', name: 'Quiet specialty consultation practices', tier: 'B',
+    examples: 'endocrinology, rheumatology, sleep medicine, insurance-based psychiatry, hematology consultation',
+    volume: 'Low to Mid', utilization: 'Low to Mid', regulatory: 'Low',
+    reimbursement: 'Mid', lever: 'None', hasLever: false },
+  { id: 'standard-specialty', name: 'Standard specialty practices', tier: 'B',
+    examples: 'neurology, cardiology, pulmonology, nephrology, ENT, urology, vascular medicine, sports medicine, pediatric subspecialties',
+    volume: 'Mid', utilization: 'Mid', regulatory: 'Low to Mid',
+    reimbursement: 'Mid to High', lever: 'None to mild', hasLever: true },
+  { id: 'procedure-integrated', name: 'Procedure-integrated specialty practices', tier: 'B',
+    examples: 'GI with endoscopy, ophthalmology with surgical center, pain management with interventional, cardiology with cath lab',
+    volume: 'High', utilization: 'High', regulatory: 'High',
+    reimbursement: 'High', lever: 'Adds leverage and stickiness', hasLever: true },
+  { id: 'outpatient-surgical', name: 'Outpatient surgical centers', tier: 'B',
+    examples: 'general ASCs, multi-specialty surgical centers',
+    volume: 'High', utilization: 'High', regulatory: 'High',
+    reimbursement: 'High', lever: 'Adds leverage and stickiness', hasLever: true },
+  { id: 'oncology', name: 'Oncology practices (with infusion)', tier: 'B', examples: null,
+    volume: 'Mid to High', utilization: 'High', regulatory: 'High',
+    reimbursement: 'High', lever: 'Adds leverage and stickiness', hasLever: true },
+  { id: 'dialysis', name: 'Dialysis centers', tier: 'B', examples: null,
+    volume: 'High', utilization: 'High', regulatory: 'High',
+    reimbursement: 'High', lever: 'Adds leverage and stickiness', hasLever: true },
+  { id: 'imaging', name: 'Imaging centers', tier: 'B',
+    examples: 'standalone radiology, MRI, CT, sometimes combined with imaging-adjacent services',
+    volume: 'Mid to High', utilization: 'High', regulatory: 'Mid',
+    reimbursement: 'Mid to High', lever: 'Mild leverage', hasLever: true },
+  { id: 'obgyn', name: 'OB-GYN practices', tier: 'B', examples: null,
+    volume: 'Mid to High', utilization: 'Mid', regulatory: 'Mid',
+    reimbursement: 'Mid', lever: 'Mild leverage', hasLever: true },
+
+  { id: 'primary-care', name: 'Primary care practices', tier: 'C',
+    examples: 'family practice, internal medicine, general pediatrics, geriatrics',
+    volume: 'High', utilization: 'High', regulatory: 'Low',
+    reimbursement: 'Low to Mid', lever: 'None', hasLever: false },
+  { id: 'urgent-care', name: 'Urgent care centers', tier: 'C', examples: null,
+    volume: 'High', utilization: 'High', regulatory: 'Low to Mid',
+    reimbursement: 'Mid', lever: 'None', hasLever: false },
+  { id: 'community-health', name: 'Community health centers', tier: 'C',
+    examples: 'FQHCs, school-based clinics, employer-based clinics',
+    volume: 'High', utilization: 'High', regulatory: 'Mid',
+    reimbursement: 'Low', lever: 'None', hasLever: false },
+  { id: 'physical-rehab', name: 'Physical rehab practices', tier: 'C',
+    examples: 'PT, OT, rehabilitation medicine',
+    volume: 'High', utilization: 'High', regulatory: 'Low to Mid',
+    reimbursement: 'Low to Mid', lever: 'None', hasLever: false },
+  { id: 'retail-optometry', name: 'High-volume retail-affiliated optometry', tier: 'C', examples: null,
+    volume: 'High', utilization: 'High', regulatory: 'Low',
+    reimbursement: 'Low to Mid', lever: 'None', hasLever: false },
+  { id: 'alternative-integrative', name: 'Alternative and integrative practices', tier: 'C',
+    examples: 'chiropractic, acupuncture, integrative medicine',
+    volume: 'Mid to High', utilization: 'Mid', regulatory: 'Low',
+    reimbursement: 'Low', lever: 'None', hasLever: false },
+  { id: 'opioid-treatment', name: 'Opioid treatment programs', tier: 'C', examples: null,
+    volume: 'High', utilization: 'High', regulatory: 'Mid',
+    reimbursement: 'Low', lever: 'None', hasLever: false },
+
+  { id: 'medicaid-primary', name: 'Medicaid-dominant primary care clinics', tier: 'D', examples: null,
+    volume: 'High', utilization: 'High', regulatory: 'Low',
+    reimbursement: 'Low', lever: 'None', hasLever: false },
+  { id: 'medicare-no-leverage', name: 'High-volume Medicare-dominant practices without specialty leverage', tier: 'D', examples: null,
+    volume: 'High', utilization: 'High', regulatory: 'Low',
+    reimbursement: 'Low', lever: 'None', hasLever: false },
+  { id: 'walkin-low-reimb', name: 'Walk-in clinics in low-reimbursement markets', tier: 'D', examples: null,
+    volume: 'High', utilization: 'High', regulatory: 'Low',
+    reimbursement: 'Low', lever: 'None', hasLever: false },
+  { id: 'free-charity', name: 'Free / charity clinics', tier: 'D', examples: null,
+    volume: 'Mid to High', utilization: 'Mid to High', regulatory: 'Low',
+    reimbursement: 'None to Low', lever: 'None', hasLever: false },
+];
+
+const TIERS = {
+  A: { label: 'Best fit', rule: 'High reimbursement, low volume, low utilization. Regulatory can be anything (high adds leverage).' },
+  B: { label: 'Bread and butter', rule: 'Mid reimbursement with low-to-mid volume and utilization, OR high reimbursement with mid-to-high volume and utilization.' },
+  C: { label: 'Working accounts', rule: 'Low reimbursement regardless of other attributes, OR mid reimbursement paired with high volume and utilization.' },
+  D: { label: "Economics won't hold", rule: "Low reimbursement combined with high volume and utilization, or any combination where the economics just won't support a sustainable account." },
+};
+
+const ATTRIBUTES = [
+  { name: 'Patient Volume',
+    promise: 'How many patients move through. More traffic, more wear.',
+    description: 'How many patients move through the facility. More patients means more wear and traffic for ESCO to clean up after. Low volume helps a prospect land in a higher tier; high volume pushes it down unless reimbursement compensates.',
+    levels: [
+      { label: 'Low', desc: 'Light patient flow. Limited wear, predictable cleaning load.', examples: 'aesthetic & cosmetic, dermatology, fertility, concierge DPC, allergy, bariatric consult, quiet specialty consult' },
+      { label: 'Mid', desc: 'Moderate patient flow. Workload scales with appointment density.', examples: 'standard specialty, OB-GYN' },
+      { label: 'High', desc: 'Heavy patient flow. Significant wear and traffic per shift.', examples: 'procedure-integrated, outpatient surgical, dialysis, primary care, urgent care, community health' },
+    ] },
+  { name: 'Facility Utilization',
+    promise: 'How hard the space gets used during open hours.',
+    description: 'How hard the space gets used during operating hours. A heavily used facility takes more labor to clean and produces more variability per square foot, which eats into margin. Low utilization helps a prospect land in a higher tier; high utilization pushes it down unless reimbursement compensates.',
+    levels: [
+      { label: 'Low', desc: 'Space sits unused for portions of the day. Predictable, contained cleaning load.', examples: 'aesthetic & cosmetic, dermatology, fertility, concierge DPC, allergy' },
+      { label: 'Mid', desc: 'Steady use across operating hours without saturation.', examples: 'bariatric consult, standard specialty, OB-GYN, alternative & integrative' },
+      { label: 'High', desc: 'Space is in continuous heavy use. Higher variability, higher labor cost.', examples: 'procedure-integrated, outpatient surgical, oncology, dialysis, imaging, primary care, urgent care, community health' },
+    ] },
+  { name: 'Regulatory and Accreditation',
+    promise: 'Facility cleanliness requirements. A modulator, not a driver.',
+    description: 'The facility-level regulatory load the practice carries: accreditation standards, sterilization protocols, and any cleanliness requirements tied to how the clinical operation runs. Regulatory works as a modulator — high regulatory adds pricing leverage and makes accounts stickier within a tier, but it usually won\'t drop a profile down on its own. Refers to facility-level requirements that affect housekeeping, not the clinical regulatory work the clinical team handles.',
+    levels: [
+      { label: 'Low', desc: 'Minimal facility-level cleanliness requirements beyond standard housekeeping.', examples: 'concierge DPC, quiet specialty consult, primary care, retail optometry, alternative & integrative' },
+      { label: 'Mid', desc: 'Defined cleanliness protocols tied to specific clinical activities.', examples: 'bariatric consult, imaging, OB-GYN, community health, opioid treatment' },
+      { label: 'High', desc: 'Strict accreditation, sterilization, or surgical-grade cleanliness protocols. Adds pricing leverage and account stickiness.', examples: 'fertility, procedure-integrated, outpatient surgical, oncology, dialysis' },
+    ] },
+  { name: 'Reimbursement Profile',
+    promise: 'How well the practice gets paid. The biggest tier driver.',
+    description: 'How well the practice gets paid for its services. Reimbursement is the biggest driver of tier placement because it determines whether a prospect can afford ESCO\'s pricing and whether the work will actually be profitable. High reimbursement opens doors, low reimbursement closes them, and mid reimbursement is where the bread-and-butter accounts live.',
+    levels: [
+      { label: 'Low', desc: 'Practice is paid poorly per encounter. Economics rarely support sustainable pricing.', examples: 'community health, alternative & integrative, opioid treatment, Medicaid-dominant primary care, free/charity clinics' },
+      { label: 'Mid', desc: 'Standard insurance-paid practice. Where bread-and-butter accounts live.', examples: 'quiet specialty consult, standard specialty, urgent care, OB-GYN' },
+      { label: 'High', desc: 'Cash-pay, surgical, membership, or specialty-paid. Opens doors and supports premium pricing.', examples: 'aesthetic & cosmetic, dermatology, fertility, concierge DPC, allergy, bariatric consult, procedure-integrated, outpatient surgical, oncology, dialysis' },
+    ] },
+];
+
+const SIZE_STEPS = [{label:'X-small'},{label:'Small'},{label:'Medium'},{label:'Large'},{label:'X-large'}];
+const LOC_STEPS = [
+  { label: 'Solo', meta: '1 site' }, { label: 'Cluster', meta: '2–5 sites' },
+  { label: 'Network', meta: '6–15 sites' }, { label: 'System', meta: '16–50 sites' },
+  { label: 'Enterprise', meta: '50+ sites' },
+];
+const PROX_STEPS = [{label:'Neighborhood'},{label:'City'},{label:'County'},{label:'State'},{label:'Region'}];
+const ACCESS_STEPS = [
+  { label: 'Limited', meta: '< 40 hr / week' },
+  { label: 'Standard', meta: '8–5 weekdays' },
+  { label: 'Extended hours', meta: 'early or late weekdays' },
+  { label: 'Extended days', meta: 'Sat and/or Sun' },
+  { label: '24-hour', meta: 'continuous' },
+];
+
+// ============ RENDER ============
+function renderTierGrid() {
+  const grid = document.getElementById('tier-grid');
+  grid.innerHTML = ['A', 'B', 'C', 'D'].map(tier => {
+    const cards = PRACTICES.filter(p => p.tier === tier).map(p => `
+      <div class="practice-card ${p.hasLever ? 'has-lever' : ''}" onclick="openFlyout('${p.id}')" role="button" tabindex="0">
+        <div class="practice-name">${p.name}</div>
+      </div>
+    `).join('');
+    return `
+      <div class="tier-zone" data-tier="${tier}">
+        <div class="tier-zone-header">
+          <div class="tier-marker"></div>
+          <div class="tier-header-info">
+            <div class="pop-anchor">
+              <button class="info-btn" data-pop="pop-tier-${tier}">+</button>
+              <div class="pop" id="pop-tier-${tier}">
+                <span class="pop-strong">Tier ${tier} placement</span>
+                ${TIERS[tier].rule}
+              </div>
+            </div>
+          </div>
+          <div class="tier-letter">${tier}</div>
+          <div class="tier-label">${TIERS[tier].label}</div>
+        </div>
+        <div class="tier-zone-body">${cards}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function chipClass(value) {
+  if (!value) return '';
+  const v = value.toLowerCase();
+  if (v.includes('none')) return 'none';
+  if (v === 'low') return 'low';
+  if (v === 'mid') return 'mid';
+  if (v === 'high') return 'high';
+  if (v.includes('high')) return 'high';
+  if (v.includes('mid')) return 'mid';
+  return 'low';
+}
+
+function renderValueChips(value, note) {
+  if (!value) return '';
+  if (value.includes(' to ')) {
+    const [lo, hi] = value.split(' to ');
+    return `<span class="chip ${chipClass(lo)}">${lo}</span><span class="chip-sep">→</span><span class="chip ${chipClass(hi)}">${hi}</span>${note ? `<span class="chip-note">${note}</span>` : ''}`;
+  }
+  return `<span class="chip ${chipClass(value)}">${value}</span>${note ? `<span class="chip-note">${note}</span>` : ''}`;
+}
+
+function openFlyout(id) {
+  const p = PRACTICES.find(x => x.id === id);
+  if (!p) return;
+  const neighbors = PRACTICES.filter(x => x.tier === p.tier && x.id !== p.id);
+  const tierInfo = TIERS[p.tier];
+
+  document.getElementById('flyout-tier-tag').textContent = `TIER ${p.tier} · ${tierInfo.label.toUpperCase()}`;
+  document.getElementById('flyout-name-target').textContent = p.name;
+  document.getElementById('flyout-examples').textContent = p.examples || '';
+
+  document.getElementById('flyout-body').innerHTML = `
+    <div class="flyout-attrs">
+      <div class="flyout-attr">
+        <div class="flyout-attr-name">Volume</div>
+        <div class="flyout-attr-value">${renderValueChips(p.volume)}</div>
+      </div>
+      <div class="flyout-attr">
+        <div class="flyout-attr-name">Utilization</div>
+        <div class="flyout-attr-value">${renderValueChips(p.utilization)}</div>
+      </div>
+      <div class="flyout-attr">
+        <div class="flyout-attr-name">Regulatory</div>
+        <div class="flyout-attr-value">${renderValueChips(p.regulatory, p.regulatoryNote)}</div>
+      </div>
+      <div class="flyout-attr">
+        <div class="flyout-attr-name">Reimbursement</div>
+        <div class="flyout-attr-value">${renderValueChips(p.reimbursement, p.reimbursementNote)}</div>
+      </div>
+    </div>
+
+    ${p.hasLever && p.lever !== 'None' ? `
+      <div class="flyout-lever">
+        <div class="lever-tag">● Lever</div>
+        <p>${p.lever}</p>
+      </div>
+    ` : ''}
+
+    <div class="flyout-rationale">
+<span class="spec-key">TIER</span>${p.tier} · ${tierInfo.label}<br>
+<span class="spec-key">RULE</span>${tierInfo.rule}
+    </div>
+
+    ${neighbors.length ? `
+      <div class="flyout-neighbors">
+        <div class="flyout-neighbors-title">Others in Tier ${p.tier}</div>
+        <div class="flyout-neighbors-row">
+          ${neighbors.map(n => `<button class="flyout-neighbor" onclick="openFlyout('${n.id}')">${n.name}</button>`).join('')}
+        </div>
+      </div>
+    ` : ''}
+  `;
+
+  document.getElementById('flyout-body').scrollTop = 0;
+  document.getElementById('scrim').classList.add('active');
+  document.getElementById('flyout').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeFlyout() {
+  document.getElementById('scrim').classList.remove('active');
+  document.getElementById('flyout').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeFlyout();
+    document.querySelectorAll('.pop.active').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.info-btn.open').forEach(b => b.classList.remove('open'));
+  }
+});
+
+function renderAttributes() {
+  document.getElementById('attr-list').innerHTML = ATTRIBUTES.map((a, idx) => `
+    <div class="attr-block" data-idx="${idx}">
+      <button class="attr-block-toggle" onclick="toggleAttr(${idx})">
+        <div class="attr-block-headline">
+          <h3>${a.name}</h3>
+          <div class="attr-block-promise">${a.promise}</div>
+        </div>
+        <span class="info-btn">+</span>
+      </button>
+      <div class="attr-block-body">
+        <div class="attr-block-inner">
+          <p class="attr-block-desc">${a.description}</p>
+          <div class="level-grid">
+            ${a.levels.map(l => `
+              <div class="level-card">
+                <div class="level-label">${l.label}</div>
+                <div class="level-desc">${l.desc}</div>
+                <div class="level-examples">${l.examples}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleAttr(idx) {
+  document.querySelector(`.attr-block[data-idx="${idx}"]`).classList.toggle('open');
+}
+
+function renderSteps(elementId, items) {
+  document.getElementById(elementId).innerHTML = items.map((item, i) => `
+    <div class="step-chip" data-step="${i + 1}">
+      <div class="step-chip-num">${String(i + 1).padStart(2, '0')}</div>
+      <div class="step-chip-label">${item.label}</div>
+      ${item.meta ? `<div class="step-chip-meta">${item.meta}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+// ====== Pops (info-btn click reveals) ======
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.info-btn[data-pop]');
+  if (btn) {
+    const popId = btn.dataset.pop;
+    const pop = document.getElementById(popId);
+    if (!pop) return;
+    const wasOpen = pop.classList.contains('active');
+    document.querySelectorAll('.pop.active').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.info-btn.open').forEach(b => b.classList.remove('open'));
+    if (!wasOpen) {
+      pop.classList.add('active');
+      btn.classList.add('open');
+    }
+    e.stopPropagation();
+    return;
+  }
+  if (!e.target.closest('.pop')) {
+    document.querySelectorAll('.pop.active').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.info-btn.open').forEach(b => b.classList.remove('open'));
+  }
+});
+
+// ====== NAV ======
+function goPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.classList.toggle('active', link.dataset.page === page);
+  });
+  closeFlyout();
+  document.querySelectorAll('.pop.active').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.info-btn.open').forEach(b => b.classList.remove('open'));
+  window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+document.querySelectorAll('.nav-link').forEach(link => {
+  link.addEventListener('click', () => goPage(link.dataset.page));
+});
+
+// INIT
+renderTierGrid();
+renderAttributes();
+renderSteps('size-steps', SIZE_STEPS);
+renderSteps('loc-steps', LOC_STEPS);
+renderSteps('prox-steps', PROX_STEPS);
+renderSteps('access-steps', ACCESS_STEPS);
+</script>
+</body>
+</html>
