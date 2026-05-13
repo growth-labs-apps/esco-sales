@@ -39,6 +39,36 @@
     --accent-soft: rgba(139, 92, 246, 0.12);
   }
 
+  /* AUTHORITY — default accent is Bedside Rose (Pain).
+     Sub-tabs flip the inner accent: Support→Teal, Clinical→Violet, Admin→Amber.
+     Scoped to only fire when the Authority page is the active outer page,
+     so the inner panels (which always exist in the DOM) can't bleed accents
+     into other pages. */
+  body:has(#page-authority.active) {
+    --accent: #E8B4BC;
+    --accent-soft: rgba(232, 180, 188, 0.18);
+    --accent-wash: rgba(232, 180, 188, 0.10);
+    --accent-strong: #C97D89;
+  }
+  body:has(#page-authority.active):has(.panel[data-panel="support"].active) {
+    --accent: #2BB3A3;
+    --accent-soft: rgba(43, 179, 163, 0.16);
+    --accent-wash: rgba(43, 179, 163, 0.07);
+    --accent-strong: #1F8C80;
+  }
+  body:has(#page-authority.active):has(.panel[data-panel="clinical"].active) {
+    --accent: #8B5CF6;
+    --accent-soft: rgba(139, 92, 246, 0.16);
+    --accent-wash: rgba(139, 92, 246, 0.06);
+    --accent-strong: #6D3FD9;
+  }
+  body:has(#page-authority.active):has(.panel[data-panel="admin"].active) {
+    --accent: #F59E0B;
+    --accent-soft: rgba(245, 158, 11, 0.20);
+    --accent-wash: rgba(245, 158, 11, 0.08);
+    --accent-strong: #B45309;
+  }
+
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
   body {
@@ -52,7 +82,8 @@
   }
   body:has(#page-attributes.active),
   body:has(#page-engagement.active),
-  body:has(#page-sales.active) { background: var(--paper-2); }
+  body:has(#page-sales.active),
+  body:has(#page-authority.active) { background: var(--paper-2); }
 
   h1, h2, h3, h4 { font-family: var(--display); font-weight: 700; letter-spacing: -0.03em; margin: 0; }
   a { color: inherit; text-decoration: none; }
@@ -305,6 +336,460 @@
   /* Footer */
   .footer { border-top: 1px solid var(--line); margin-top: 80px; padding: 32px 0; font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.08em; display: flex; justify-content: space-between; }
 
+  /* ============================================================
+     AUTHORITY — all styles scoped under #page-authority to prevent
+     name collisions with other pages (.section, .tabs, .tab, .panel,
+     .pain-shared, .hero overrides, etc. are scoped here only).
+     ============================================================ */
+
+  /* Tabs (inner) */
+  #page-authority .tabs-wrap { max-width: 1360px; margin: 0 auto; padding: 32px 0 0; }
+  #page-authority .tabs-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  #page-authority .tabs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  #page-authority .tab {
+    background: transparent;
+    border: none;
+    border-bottom: 4px solid transparent;
+    padding: 20px 24px 22px;
+    text-align: left;
+    cursor: pointer;
+    font-family: var(--display);
+    color: var(--muted);
+    transition: color 180ms ease, border-color 180ms ease, background 180ms ease;
+    position: relative;
+  }
+  #page-authority .tab:hover { background: var(--paper); color: var(--ink); }
+  #page-authority .tab[data-tab="support"]  { --tab-accent: #1F8C80; --tab-accent-wash: rgba(43, 179, 163, 0.16); }
+  #page-authority .tab[data-tab="clinical"] { --tab-accent: #6D3FD9; --tab-accent-wash: rgba(139, 92, 246, 0.14); }
+  #page-authority .tab[data-tab="admin"]    { --tab-accent: #B45309; --tab-accent-wash: rgba(245, 158, 11, 0.18); }
+  #page-authority .tab.active {
+    color: var(--ink);
+    border-bottom-color: var(--tab-accent);
+    background: var(--tab-accent-wash);
+  }
+  #page-authority .tab .tab-num::before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--tab-accent);
+    margin-right: 10px;
+    vertical-align: middle;
+    opacity: 0.55;
+    transition: opacity 180ms ease, transform 180ms ease;
+  }
+  #page-authority .tab.active .tab-num::before { opacity: 1; transform: scale(1.1); }
+  #page-authority .tab .tab-num {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 6px;
+  }
+  #page-authority .tab.active .tab-num { color: var(--tab-accent); }
+  #page-authority .tab .tab-name {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    display: block;
+  }
+
+  /* Pain shared section — pinned to Bedside Rose regardless of active sub-tab */
+  #page-authority .pain-shared {
+    --accent: #E8B4BC;
+    --accent-soft: rgba(232, 180, 188, 0.22);
+    --accent-wash: rgba(232, 180, 188, 0.10);
+    --accent-strong: #C97D89;
+    max-width: 1360px;
+    margin: 0 auto;
+    padding: 0;
+  }
+  #page-authority .pain-shared-inner { padding: 0; }
+  #page-authority .pain-shared .auth-section { padding: 40px 0 8px; }
+
+  /* Trajectory wrapper */
+  #page-authority .trajectory {
+    max-width: 1360px;
+    margin: 0 auto;
+    padding: 0 0 16px;
+  }
+  #page-authority .panel { display: none; }
+  #page-authority .panel.active { display: block; }
+
+  /* Roles band */
+  #page-authority .roles-band {
+    padding: 40px 0 0;
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+  #page-authority .roles-band-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding-top: 14px;
+  }
+  #page-authority .roles-band-label .roles-band-num {
+    color: var(--accent-strong);
+    margin-right: 8px;
+  }
+  #page-authority .roles-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  #page-authority .role-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 20px;
+    background: var(--paper);
+    border: 1px solid var(--accent-soft);
+    border-radius: 4px;
+    font-family: var(--display);
+    font-size: 17px;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    color: var(--ink);
+    transition: background 180ms ease, border-color 180ms ease;
+  }
+  #page-authority .role-chip:hover {
+    background: var(--accent-wash);
+    border-color: var(--accent-strong);
+  }
+  #page-authority .role-chip::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent-strong);
+    flex-shrink: 0;
+  }
+
+  /* Section blocks (scoped — uses .auth-section to avoid colliding with future
+     uses of a generic .section class elsewhere) */
+  #page-authority .auth-section { position: relative; padding: 56px 0 0; }
+  #page-authority .auth-section-head {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--accent-soft);
+    margin-bottom: 32px;
+  }
+  #page-authority .auth-section-title {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 96px;
+    letter-spacing: -0.045em;
+    line-height: 0.9;
+    color: var(--accent-strong);
+  }
+  #page-authority .auth-section-meta {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: right;
+    padding-bottom: 16px;
+  }
+
+  /* Authority content block */
+  #page-authority .auth-block {
+    background: var(--accent-wash);
+    border: 1px solid var(--accent-soft);
+    border-radius: 8px;
+    padding: 36px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  #page-authority .auth-block::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 6px; height: 100%;
+    background: var(--accent-strong);
+  }
+  #page-authority .auth-block-head {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  #page-authority .auth-block-head h3 {
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+  #page-authority .auth-block p {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.65;
+    color: var(--ink);
+    max-width: 820px;
+  }
+
+  /* Pain — five cards */
+  #page-authority .pain-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+  }
+  #page-authority .pain-card {
+    background: var(--paper);
+    border: 1px solid var(--accent-soft);
+    border-left: 3px solid var(--accent-strong);
+    border-radius: 6px;
+    padding: 20px 18px 18px;
+    position: relative;
+    cursor: pointer;
+    transition: background 180ms ease, border-color 180ms ease, transform 180ms ease;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  #page-authority .pain-card:hover {
+    background: var(--accent-wash);
+    border-color: var(--accent-strong);
+    border-left-color: var(--accent-strong);
+    transform: translateY(-2px);
+  }
+  #page-authority .pain-card h4 {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.3;
+    margin: 8px 0 0;
+    padding-right: 24px;
+  }
+  #page-authority .pain-card .open-btn {
+    position: absolute;
+    bottom: 12px; right: 12px;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    transition: transform 180ms ease, background 180ms ease, color 180ms ease;
+    padding: 0;
+  }
+  #page-authority .pain-card .open-btn:hover {
+    background: var(--ink);
+    color: #fff;
+    border-color: var(--ink);
+  }
+
+  /* Consequence — continuation + escalation */
+  #page-authority .cons-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  #page-authority .cons-block {
+    background: var(--paper);
+    border: 1px solid var(--accent-soft);
+    border-radius: 8px;
+    padding: 32px 36px;
+    position: relative;
+    overflow: hidden;
+  }
+  #page-authority .cons-block.continuation { background: var(--accent-wash); }
+  #page-authority .cons-block.continuation::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px; height: 100%;
+    background: var(--accent);
+    opacity: 0.6;
+  }
+  #page-authority .cons-block.escalation {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+  }
+  #page-authority .cons-block.escalation::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 6px; height: 100%;
+    background: var(--accent-strong);
+  }
+  #page-authority .cons-block.escalation .cons-key,
+  #page-authority .cons-block.escalation p { color: var(--ink); }
+  #page-authority .cons-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  #page-authority .cons-label .cons-glyph {
+    font-family: var(--mono);
+    font-size: 18px;
+    color: var(--accent-strong);
+    width: 20px;
+  }
+  #page-authority .cons-label .cons-key {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  #page-authority .cons-label .cons-arrow {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+  #page-authority .cons-block p {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.65;
+    color: var(--ink);
+  }
+  #page-authority .cons-block.escalation p { font-weight: 500; }
+
+  /* Scale — admin only */
+  #page-authority .scale-block {
+    margin-top: 32px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 28px 32px;
+  }
+  #page-authority .scale-block .scale-head {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--accent-soft);
+    flex-wrap: wrap;
+  }
+  #page-authority .scale-block .scale-head .num {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent-strong);
+  }
+  #page-authority .scale-block .scale-head h3 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+  #page-authority .scale-block .scale-head .meta {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  #page-authority .scale-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  #page-authority .scale-item {
+    padding: 24px 26px;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    background: var(--paper-2);
+    position: relative;
+  }
+  #page-authority .scale-item::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 36px;
+    background: var(--accent-strong);
+    border-radius: 6px 0 0 0;
+  }
+  #page-authority .scale-item h4 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0 0 12px;
+    color: var(--ink);
+  }
+  #page-authority .scale-item p {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.65;
+    color: var(--ink);
+  }
+
+  /* Authority popover system — distinct class name (.popover) keeps it
+     fully separate from index's .pop tooltip system */
+  .popover {
+    position: absolute;
+    z-index: 100;
+    background: var(--ink);
+    color: #fff;
+    padding: 16px 18px;
+    border-radius: 6px;
+    max-width: 340px;
+    box-shadow: 0 20px 48px rgba(10, 37, 64, 0.28);
+    font-size: 13px;
+    line-height: 1.55;
+    display: none;
+  }
+  .popover.open { display: block; }
+  .popover::before {
+    content: "";
+    position: absolute;
+    width: 10px; height: 10px;
+    background: var(--ink);
+    transform: rotate(45deg);
+  }
+  .popover[data-arrow="top"]::before { top: -5px; left: 24px; }
+  .popover[data-arrow="top-right"]::before { top: -5px; right: 24px; }
+  .popover .pop-head {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+  }
+  .popover .pop-head .num { color: var(--accent); margin-right: 6px; }
+  .popover p { margin: 0; }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    #page-authority .auth-section-title { font-size: 64px; }
+    #page-authority .pain-grid { grid-template-columns: repeat(2, 1fr); }
+    #page-authority .cons-grid { grid-template-columns: 1fr; }
+    #page-authority .scale-grid { grid-template-columns: 1fr; }
+  }
+
   /* Responsive */
   @media (max-width: 1100px) {
     .tier-grid { grid-template-columns: repeat(2, 1fr); }
@@ -334,6 +819,7 @@
       <button class="nav-link" data-page="attributes">Attributes</button>
       <button class="nav-link" data-page="engagement">Engagement</button>
       <button class="nav-link" data-page="sales">Sales</button>
+      <button class="nav-link" data-page="authority">Authority</button>
     </div>
   </div>
 </nav>
@@ -586,6 +1072,278 @@
     <span>Time is the only dynamic profile attribute</span>
   </div>
 </section>
+
+<!-- AUTHORITY -->
+<section class="page" id="page-authority">
+  <div class="hero">
+    <div class="hero-dots"></div>
+    <div class="hero-inner">
+      <span class="kicker dark">● Pain — Authority — Consequence</span>
+      <h1>Who <em>feels it</em>, and what it <em>becomes.</em></h1>
+      <p class="hero-tag">Five forms of pain show up across every practice. Authority level determines who feels each one most directly, and what it escalates into if nothing changes.</p>
+    </div>
+  </div>
+
+  <section class="pain-shared">
+    <div class="pain-shared-inner">
+      <div class="auth-section">
+        <div class="auth-section-head">
+          <div class="auth-section-title">Pain</div>
+          <div class="auth-section-meta">Five forms · shared across authority levels</div>
+        </div>
+        <div class="pain-grid">
+          <div class="pain-card" data-pop="pain-1">
+            <h4>Perceived Quality of Care</h4>
+            <button class="open-btn" data-pop-trigger="pain-1" aria-label="Open">+</button>
+          </div>
+          <div class="pain-card" data-pop="pain-2">
+            <h4>Loss of Patient Trust</h4>
+            <button class="open-btn" data-pop-trigger="pain-2" aria-label="Open">+</button>
+          </div>
+          <div class="pain-card" data-pop="pain-3">
+            <h4>Reputation Damage</h4>
+            <button class="open-btn" data-pop-trigger="pain-3" aria-label="Open">+</button>
+          </div>
+          <div class="pain-card" data-pop="pain-4">
+            <h4>Staff Burden</h4>
+            <button class="open-btn" data-pop-trigger="pain-4" aria-label="Open">+</button>
+          </div>
+          <div class="pain-card" data-pop="pain-5">
+            <h4>Increased Infection Risk</h4>
+            <button class="open-btn" data-pop-trigger="pain-5" aria-label="Open">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="tabs-wrap">
+    <div class="tabs-label">Select authority level to see consequences</div>
+    <div class="tabs" role="tablist">
+      <button class="tab active" data-tab="support" role="tab">
+        <span class="tab-num">Authority</span>
+        <span class="tab-name">Clinical Support</span>
+      </button>
+      <button class="tab" data-tab="clinical" role="tab">
+        <span class="tab-num">Authority</span>
+        <span class="tab-name">Clinical</span>
+      </button>
+      <button class="tab" data-tab="admin" role="tab">
+        <span class="tab-num">Authority</span>
+        <span class="tab-name">Administrative</span>
+      </button>
+    </div>
+  </div>
+
+  <section class="trajectory">
+
+    <!-- PANEL: CLINICAL SUPPORT -->
+    <div class="panel active" data-panel="support">
+      <div class="roles-band">
+        <div class="roles-band-label">Typical roles</div>
+        <div class="roles-chips">
+          <span class="role-chip">Front-of-house admin</span>
+          <span class="role-chip">Medical assistants</span>
+          <span class="role-chip">Nurses</span>
+          <span class="role-chip">Techs</span>
+          <span class="role-chip">Intake staff</span>
+        </div>
+      </div>
+
+      <div class="auth-section">
+        <div class="auth-section-head">
+          <div class="auth-section-title">Authority</div>
+          <div class="auth-section-meta">Clinical Support</div>
+        </div>
+        <div class="auth-block">
+          <div class="auth-block-head">
+            <h3>Clinical Support</h3>
+          </div>
+          <p>Holds no decision-making power over vendors or contracts. Influence is informal and indirect, expressed through complaints and escalations to supervisors.</p>
+        </div>
+      </div>
+
+      <div class="auth-section">
+        <div class="auth-section-head">
+          <div class="auth-section-title">Consequence</div>
+          <div class="auth-section-meta">Continuation · Escalation</div>
+        </div>
+        <div class="cons-grid">
+          <div class="cons-block continuation">
+            <div class="cons-label">
+              <span class="cons-glyph">─</span>
+              <span class="cons-key">Continuation</span>
+              <span class="cons-arrow">what staff continue to bear →</span>
+            </div>
+            <p>Recurring problems that come from working in a poorly maintained space, such as fielding patient complaints and anxiety about improperly serviced clinical and non-clinical areas.</p>
+          </div>
+          <div class="cons-block escalation">
+            <div class="cons-label">
+              <span class="cons-glyph">▲</span>
+              <span class="cons-key">Escalation</span>
+              <span class="cons-arrow">what it builds toward →</span>
+            </div>
+            <p>Burnout and low morale.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL: CLINICAL -->
+    <div class="panel" data-panel="clinical">
+      <div class="roles-band">
+        <div class="roles-band-label">Typical roles</div>
+        <div class="roles-chips">
+          <span class="role-chip">Physicians</span>
+          <span class="role-chip">Lead nurses</span>
+          <span class="role-chip">Clinical directors</span>
+          <span class="role-chip">Medical directors</span>
+        </div>
+      </div>
+
+      <div class="auth-section">
+        <div class="auth-section-head">
+          <div class="auth-section-title">Authority</div>
+          <div class="auth-section-meta">Clinical</div>
+        </div>
+        <div class="auth-block">
+          <div class="auth-block-head">
+            <h3>Clinical</h3>
+          </div>
+          <p>Limited direct authority over vendor contracts but significant influence on facility-related decisions. That influence carries weight because clinicians are accountable for clinical quality, patient safety, and accreditation. Concerns raised through escalation can drive a vendor change.</p>
+        </div>
+      </div>
+
+      <div class="auth-section">
+        <div class="auth-section-head">
+          <div class="auth-section-title">Consequence</div>
+          <div class="auth-section-meta">Continuation · Escalation</div>
+        </div>
+        <div class="cons-grid">
+          <div class="cons-block continuation">
+            <div class="cons-label">
+              <span class="cons-glyph">─</span>
+              <span class="cons-key">Continuation</span>
+              <span class="cons-arrow">what staff continue to bear →</span>
+            </div>
+            <p>Ongoing clinical concern about cleaning adequacy and its effects on accreditation and regulatory compliance.</p>
+          </div>
+          <div class="cons-block escalation">
+            <div class="cons-label">
+              <span class="cons-glyph">▲</span>
+              <span class="cons-key">Escalation</span>
+              <span class="cons-arrow">what it builds toward →</span>
+            </div>
+            <p>Accreditation findings, regulatory action, liability exposure, credibility damage.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL: ADMINISTRATIVE -->
+    <div class="panel" data-panel="admin">
+      <div class="roles-band">
+        <div class="roles-band-label">Typical roles</div>
+        <div class="roles-chips">
+          <span class="role-chip">Practice manager</span>
+          <span class="role-chip">Office administrator</span>
+          <span class="role-chip">Operations director</span>
+          <span class="role-chip">COO</span>
+          <span class="role-chip">CEO</span>
+          <span class="role-chip">CFO</span>
+        </div>
+      </div>
+
+      <div class="auth-section">
+        <div class="auth-section-head">
+          <div class="auth-section-title">Authority</div>
+          <div class="auth-section-meta">Administrative</div>
+        </div>
+        <div class="auth-block">
+          <div class="auth-block-head">
+            <h3>Administrative</h3>
+          </div>
+          <p>Direct decision-making power over vendor selection, performance management, and the facility services budget. Owns the day-to-day relationship with the cleaning vendor. As an organization grows in size, locations, and proximity, this authority can spread across multiple roles or sit higher in the organization.</p>
+        </div>
+      </div>
+
+      <div class="auth-section">
+        <div class="auth-section-head">
+          <div class="auth-section-title">Consequence</div>
+          <div class="auth-section-meta">Continuation · Escalation</div>
+        </div>
+        <div class="cons-grid">
+          <div class="cons-block continuation">
+            <div class="cons-label">
+              <span class="cons-glyph">─</span>
+              <span class="cons-key">Continuation</span>
+              <span class="cons-arrow">what staff continue to bear →</span>
+            </div>
+            <p>Time spent on follow-ups, complaints, corrective conversations, and documentation for an underperforming vendor; their professional judgment in selecting and managing the vendor is questioned.</p>
+          </div>
+          <div class="cons-block escalation">
+            <div class="cons-label">
+              <span class="cons-glyph">▲</span>
+              <span class="cons-key">Escalation</span>
+              <span class="cons-arrow">what it builds toward →</span>
+            </div>
+            <p>Absorbing costs that flow from consequences at the clinical support and clinical layers, from managing low morale to navigating a serious liability exposure.</p>
+          </div>
+        </div>
+
+        <div class="scale-block">
+          <div class="scale-head">
+            <span class="num">At scale</span>
+            <h3>Scale and Administrative Authority</h3>
+            <span class="meta">Administrative only</span>
+          </div>
+          <div class="scale-grid">
+            <div class="scale-item">
+              <h4>Cross-Site Variation</h4>
+              <p>Different crews, site managers, and possibly vendors, all working at different operational standards increase variation across sites. Identifying whether a cleaning failure is local to a site, common across a vendor, or a pattern across the organization becomes an additional challenge for an administrative authority.</p>
+            </div>
+            <div class="scale-item">
+              <h4>Dispersed Authority</h4>
+              <p>Authority itself can also be dispersed across a wider and deeper administrative structure, adding additional cost and complexity to identifying and resolving clinical-support and clinical issues.</p>
+            </div>
+            <div class="scale-item">
+              <h4>Consolidation</h4>
+              <p>When cleaning is split across multiple vendors, the organization manages multiple separate vendor relationships rather than one. Consolidation could reduce the administrative work of maintaining these relationships and could produce better pricing.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <div class="footer">
+    <span>ESCO · 2026 · Prospect Framework v1</span>
+    <span>Pain — Authority — Consequence</span>
+  </div>
+</section>
+
+<!-- Authority popovers — outside the page section so they can position freely -->
+<div class="popover" id="pop-pain-1">
+  <div class="pop-head">Perceived Quality of Care</div>
+  <p>When cleanliness slips, patients form a lower impression of the clinical care the practice provides.</p>
+</div>
+<div class="popover" id="pop-pain-2">
+  <div class="pop-head">Loss of Patient Trust</div>
+  <p>Visible cleanliness issues erode patient trust in the practice over time.</p>
+</div>
+<div class="popover" id="pop-pain-3">
+  <div class="pop-head">Reputation Damage</div>
+  <p>Visible cleanliness issues generate complaints, negative reviews, and word-of-mouth that damage the practice's reputation.</p>
+</div>
+<div class="popover" id="pop-pain-4">
+  <div class="pop-head">Staff Burden</div>
+  <p>When cleaning services fail, clinical and administrative staff absorb the consequences through complaints, scope creep, and the friction of working in a poorly maintained space.</p>
+</div>
+<div class="popover" id="pop-pain-5">
+  <div class="pop-head">Increased Infection Risk</div>
+  <p>When cleaning services in a healthcare facility fail, the risk of infection transmission increases.</p>
+</div>
 
 <!-- FLYOUT -->
 <div class="scrim" id="scrim" onclick="closeFlyout()"></div>
@@ -971,6 +1729,107 @@ renderSteps('size-steps', SIZE_STEPS);
 renderSteps('loc-steps', LOC_STEPS);
 renderSteps('prox-steps', PROX_STEPS);
 renderSteps('access-steps', ACCESS_STEPS);
+
+// ====== AUTHORITY — inner tabs ======
+// Scoped to #page-authority so the inner .tab buttons don't collide
+// with the outer .nav-link page-switcher.
+(function () {
+  const authPage = document.getElementById('page-authority');
+  if (!authPage) return;
+
+  const tabs = authPage.querySelectorAll('.tab');
+  const panels = authPage.querySelectorAll('.panel');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const target = tab.getAttribute('data-tab');
+      tabs.forEach(t => t.classList.toggle('active', t === tab));
+      panels.forEach(p => p.classList.toggle('active', p.getAttribute('data-panel') === target));
+      closePop();
+      // Stay anchored on the tabs row when switching sub-panels.
+      const tabsWrap = authPage.querySelector('.tabs-wrap');
+      if (tabsWrap) {
+        window.scrollTo({ top: tabsWrap.offsetTop - 80, behavior: 'smooth' });
+      }
+    });
+  });
+
+  // ====== AUTHORITY — popovers (.popover, distinct from index's .pop system) ======
+  let openPop = null;
+
+  function closePop() {
+    if (openPop) {
+      openPop.classList.remove('open');
+      document.querySelectorAll('[data-pop-trigger]').forEach(b => b.style.transform = '');
+      openPop = null;
+    }
+  }
+
+  function positionPop(pop, trigger) {
+    const rect = trigger.getBoundingClientRect();
+    const scrollY = window.scrollY;
+    const scrollX = window.scrollX;
+    const popWidth = 340;
+    let left = rect.left + scrollX;
+    let top = rect.bottom + scrollY + 12;
+
+    if (left + popWidth > window.innerWidth - 16) {
+      left = window.innerWidth - popWidth - 16;
+      pop.setAttribute('data-arrow', 'top-right');
+    } else {
+      pop.setAttribute('data-arrow', 'top');
+    }
+
+    pop.style.left = left + 'px';
+    pop.style.top = top + 'px';
+  }
+
+  authPage.querySelectorAll('[data-pop]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      if (e.target.classList.contains('open-btn') || e.target.classList.contains('scale-open')) return;
+      const id = el.getAttribute('data-pop');
+      const pop = document.getElementById('pop-' + id);
+      if (!pop) return;
+      if (openPop === pop) { closePop(); return; }
+      closePop();
+      positionPop(pop, el);
+      pop.classList.add('open');
+      openPop = pop;
+    });
+  });
+
+  authPage.querySelectorAll('[data-pop-trigger]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = btn.getAttribute('data-pop-trigger');
+      const pop = document.getElementById('pop-' + id);
+      if (!pop) return;
+      if (openPop === pop) { closePop(); return; }
+      closePop();
+      positionPop(pop, btn.parentElement);
+      pop.classList.add('open');
+      openPop = pop;
+      btn.style.transform = 'rotate(45deg)';
+    });
+  });
+
+  document.addEventListener('click', (e) => {
+    if (openPop && !openPop.contains(e.target) && !e.target.closest('[data-pop]') && !e.target.closest('[data-pop-trigger]')) {
+      closePop();
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closePop();
+  });
+
+  window.addEventListener('scroll', () => { if (openPop) closePop(); });
+  window.addEventListener('resize', () => { if (openPop) closePop(); });
+
+  // Expose closePop locally so the tab handler above can call it.
+  // (Re-bind by referencing it through the closure — the tab handler
+  // already does `closePop()` via this same closure scope.)
+})();
 </script>
 </body>
 </html>
